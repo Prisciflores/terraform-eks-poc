@@ -1,0 +1,32 @@
+
+# .gitignore para Terraform + GitHub Actions
+
+# Archivos de estado de Terraform
+*.tfstate
+*.tfstate.backup
+
+# Planes de ejecución
+*.tfplan
+
+# Archivos de bloqueo
+.terraform.lock.hcl
+
+# Directorio donde se descargan proveedores y módulos
+.terraform/
+
+# Variables sensibles (nunca subir terraform.tfvars con secretos)
+terraform.tfvars
+terraform.tfvars.json
+
+# Archivos de logs o debugging
+crash.log
+*.log
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Configuración personal de editores
+.idea/
+.vscode/
+*.swp

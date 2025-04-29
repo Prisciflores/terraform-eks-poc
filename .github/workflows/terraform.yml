@@ -1,0 +1,168 @@
+# .github/workflows/terraform.yml
+
+name: Terraform CI
+
+# ⚒️ Se ejecuta en cada push a main o de forma manual
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      tf_action:
+        description: 'Acción a ejecutar con Terraform'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - destroy
+      environment:
+        description: 'Entorno de despliegue'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - production
+          - staging
+          - dev
+
+jobs:
+
+  # ✅ JOB 1: Revisar formato del código
+  format:
+    name: ✅ Terraform Format
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}-plan
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Run terraform fmt
+        run: terraform fmt -check
+
+
+  # 🔍 JOB 2: Validación
+  validate:
+    name: 🔍 Terraform Validate
+    needs: format
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}-plan
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+
+  # 📂 JOB 3: Generar plan
+  plan:
+    name: 📂 Terraform Plan
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}-plan
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan -var-file="terraform.tfvars" -no-color > plan_output.txt
+
+      - name: Subir resultado del plan como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: plan_output.txt
+
+      - name: Mostrar resumen del plan
+        run: cat plan_output.txt >> $GITHUB_STEP_SUMMARY
+
+
+  # 🚀 JOB 4: Apply con aprobación manual
+  terraform-apply:
+    name: 🚀 Terraform Apply
+    needs: plan
+    if: ${{ github.event.inputs.tf_action == 'apply' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+      url: https://github.com/prisciflores/terraform-eks-poc/actions
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -var-file="terraform.tfvars"
+
+
+  # ⚠️ JOB 5: Destroy con aprobación manual
+  terraform-destroy:
+    name: ⚠️ Terraform Destroy
+    needs: plan
+    if: ${{ github.event.inputs.tf_action == 'destroy' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+      url: https://github.com/prisciflores/terraform-eks-poc/actions
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve -var-file="terraform.tfvars"

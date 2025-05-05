@@ -113,7 +113,7 @@ jobs:
         run: terraform init
 
       - name: Terraform Plan
-        run: terraform plan -var-file="terraform.tfvars" -no-color > plan_output.txt
+        run: terraform plan -no-color > plan_output.txt
 
       - name: Subir resultado del plan como artefacto
         uses: actions/upload-artifact@v4

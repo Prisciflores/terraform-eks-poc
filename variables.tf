@@ -1,5 +1,11 @@
 # variables.tf - Variables para módulo EKS
 
+variable "aws_region" {
+  description = "Región de AWS donde se desplegará el clúster"
+  type        = string
+  default     = "us-east-1" # Cambia esto por la región deseada
+}
+
 variable "cluster_name" {
   description = "Nombre del clúster EKS"
   type        = string

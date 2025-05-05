@@ -34,7 +34,7 @@ jobs:
   format:
     name: ✅ Terraform Format
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}-plan
+    environment: ${{ github.event.inputs.environment || 'dev' }}-plan
 
     steps:
       - name: Checkout code
@@ -43,7 +43,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.6
+          terraform_version: 1.11.3
 
       - name: Run terraform fmt
         run: terraform fmt -check
@@ -54,16 +54,33 @@ jobs:
     name: 🔍 Terraform Validate
     needs: format
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}-plan
+    environment: ${{ github.event.inputs.environment || 'dev' }}-plan
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # - name: Debug AWS vars
+      #   run: |
+      #     echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
+      #     echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      #     echo "environment=${{ inputs.environment }}"
+      
+      # - name: Configure AWS credentials   # ← Nuevo paso
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region:            us-east-1
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.6
+          terraform_version: 1.11.3
 
       - name: Terraform Init
         run: terraform init
@@ -77,7 +94,7 @@ jobs:
     name: 📂 Terraform Plan
     needs: validate
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}-plan
+    environment: ${{ github.event.inputs.environment || 'dev' }}-plan
 
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -90,13 +107,13 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.6
+          terraform_version: 1.11.3
 
       - name: Terraform Init
         run: terraform init
 
       - name: Terraform Plan
-        run: terraform plan -var-file="terraform.tfvars" -no-color > plan_output.txt
+        run: terraform plan -no-color > plan_output.txt
 
       - name: Subir resultado del plan como artefacto
         uses: actions/upload-artifact@v4
@@ -129,7 +146,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.6
+          terraform_version: 1.11.3
 
       - name: Terraform Init
         run: terraform init
@@ -159,7 +176,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.6
+          terraform_version: 1.11.3
 
       - name: Terraform Init
         run: terraform init

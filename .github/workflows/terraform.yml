@@ -152,7 +152,7 @@ jobs:
         run: terraform init
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var-file="terraform.tfvars"
+        run: terraform apply -auto-approve
 
 
   # ⚠️ JOB 5: Destroy con aprobación manual

@@ -15,7 +15,7 @@ variable "cluster_name" {
 variable "cluster_version" {
   description = "Versión de Kubernetes para el clúster"
   type        = string
-  default     = "1.31" # Cambia esto por la versión deseada
+  default     = "1.32" # Cambia esto por la versión deseada
 }
 
 # variables.tf - Variables para módulo VPC

@@ -12,7 +12,7 @@ module "eks" {
 
   # Optional
   cluster_endpoint_public_access       = true
-  cluster_endpoint_public_access_cidrs = ["186.67.243.48/32"] # IP pública de tu máquina local
+  cluster_endpoint_public_access_cidrs = ["186.67.243.223/32"] # IP pública de tu máquina local
 
 
   eks_managed_node_groups = {

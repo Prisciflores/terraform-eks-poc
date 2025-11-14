@@ -91,17 +91,3 @@ Revisa `outputs.tf` para ver las salidas exactas que este proyecto expone. Habit
 - Añadir validaciones y pruebas (terratest o `terraform validate` + unit tests).
 - Documentar outputs exactos y variables con ejemplos concretos.
 
-## Licencia
-
-Licencia: revisa el repositorio para la licencia aplicable o añade un archivo `LICENSE` si aún no existe.
-
----
-
-Si quieres, puedo:
-
-- añadir un `terraform.tfvars.example` con valores recomendados,
-- extraer y documentar las variables y outputs exactos leyendo `variables.tf` y `outputs.tf` para incluir sus nombres y ejemplos concretos en el README,
-- o preparar un pequeño workflow de GitHub Actions para validar y aplicar el plan.
-
-Indícame cuál de estas opciones prefieres.
-
